@@ -1,0 +1,3 @@
+# pip-compile requirements.in
+
+requests

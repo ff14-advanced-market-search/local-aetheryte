@@ -3,35 +3,17 @@ import json
 import os
 import time
 
-
-def create_undercut_message(json_response, webhook_url):
-    # Start building the message content
-    server = json_response["server"]
-    message_content = (
-        f"Undercuts - {server}\nList of items that are being undercut!\n\n"
-    )
-    message_content_body = ""
-
-    auctions_by_retainer = organize_by_retainer(json_response.get("auction_data", {}))
-    # Append information about each undercut item
-    for retainer, details in auctions_by_retainer.items():
-        retainer_content_body = f"**{retainer}**\n"
-        for auction in details:
-            retainer_content_body += f"[{auction['real_name']}]({auction['link']})\n"
-
-        # make sure we dont go over 2000 characters
-        if len(retainer_content_body) > 1700:
-            retainer_content_body += f"Too many undercuts on {retainer}, update all items on on this or ignore it!\n"
-
-        message_content_body += retainer_content_body
-        if len(message_content + message_content_body) > 1700:
-            send_to_discord(message_content + message_content_body, webhook_url, server)
-            # reset message content after sending
-            message_content_body = retainer_content_body
-
-    # send final message if anything is left
-    if len(message_content_body) != 0:
-        send_to_discord(message_content + message_content_body, webhook_url, server)
+def create_embed(title, description, fields):
+    embed = {
+        "title": title,
+        "description": description,
+        "color": 0x00ff00,  # You can change this to any color you prefer
+        "fields": fields,
+        "footer": {
+            "text": time.strftime('%m/%d/%Y %I:%M %p', time.localtime())  # Adds current time as footer
+        }
+    }
+    return embed
 
 
 def organize_by_retainer(auction_data):
@@ -44,20 +26,61 @@ def organize_by_retainer(auction_data):
     return auctions_by_retainer
 
 
-def send_to_discord(message, webhook_url, server):
+def send_to_discord(embed, webhook_url):
     # Send message
-    if len(message) > 0:
-        print(f"sending message for {server} undercuts to discord...")
-        req = requests.post(webhook_url, json={"content": message})
-        if req.status_code != 204 and req.status_code != 200:
-            print(
-                f"Failed to send message to discord for {server} undercuts: {req.status_code} - {req.text}"
-            )
-        else:
-            print(f"Message sent for {server} undercuts")
+    print(f"sending embed to discord...")
+    req = requests.post(webhook_url, json={"embeds": [embed]})
+    if req.status_code != 204 and req.status_code != 200:
+        print(f"Failed to send embed to discord: {req.status_code} - {req.text}")
     else:
-        print(f"No undercuts found on {server}")
+        print(f"Embed sent successfully")
 
+
+def create_undercut_message(json_response, webhook_url):
+    server = json_response["server"]
+    title = f"Undercuts - {server}"
+    description = "List of items that are being undercut!"
+    fields = []
+
+    auctions_by_retainer = organize_by_retainer(json_response.get("auction_data", {}))
+
+    for retainer, details in auctions_by_retainer.items():
+        value = "\n".join(f"[{auction['real_name']}]({auction['link']})" for auction in details)
+        fields.append({"name": f"**{retainer}**", "value": value, "inline": True})
+
+    embed = create_embed(title, description, fields)
+    send_to_discord(embed, webhook_url)
+
+
+## not using embeds, but handles case of too much text
+# def old_create_undercut_message(json_response, webhook_url):
+#     # Start building the message content
+#     server = json_response["server"]
+#     message_content = (
+#         f"Undercuts - {server}\nList of items that are being undercut!\n\n"
+#     )
+#     message_content_body = ""
+#
+#     auctions_by_retainer = organize_by_retainer(json_response.get("auction_data", {}))
+#     # Append information about each undercut item
+#     for retainer, details in auctions_by_retainer.items():
+#         retainer_content_body = f"**{retainer}**\n"
+#         for auction in details:
+#             retainer_content_body += f"[{auction['real_name']}]({auction['link']})\n"
+#
+#         # make sure we dont go over 2000 characters
+#         if len(retainer_content_body) > 1700:
+#             retainer_content_body += f"Too many undercuts on {retainer}, update all items on on this or ignore it!\n"
+#
+#         message_content_body += retainer_content_body
+#         if len(message_content + message_content_body) > 1700:
+#             send_to_discord(message_content + message_content_body, webhook_url, server)
+#             # reset message content after sending
+#             message_content_body = retainer_content_body
+#
+#     # send final message if anything is left
+#     if len(message_content_body) != 0:
+#         send_to_discord(message_content + message_content_body, webhook_url, server)
 
 def run_undercut(webhooks):
     for filename in os.listdir("./user_data/undercut"):
