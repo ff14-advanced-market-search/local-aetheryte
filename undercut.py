@@ -12,16 +12,36 @@ def create_undercut_message(json_response, webhook_url):
     )
     message_content_body = ""
 
+    auctions_by_retainer = organize_by_retainer(json_response.get("auction_data", {}))
     # Append information about each undercut item
-    for item_id, details in json_response.get("auction_data", {}).items():
-        message_content_body += f"[{details['real_name']}]({details['link']})\n"
+    for retainer, details in auctions_by_retainer.items():
+        retainer_content_body = f"**{retainer}**\n"
+        for auction in details:
+            retainer_content_body += f"[{auction['real_name']}]({auction['link']})\n"
+
         # make sure we dont go over 2000 characters
-        if len(message_content + message_content_body) > 1500:
+        if len(retainer_content_body) > 1700:
+            retainer_content_body += f"Too many undercuts on {retainer}, update all items on on this or ignore it!\n"
+
+        message_content_body += retainer_content_body
+        if len(message_content + message_content_body) > 1700:
             send_to_discord(message_content + message_content_body, webhook_url, server)
             # reset message content after sending
-            message_content_body = ""
+            message_content_body = retainer_content_body
+
     # send final message if anything is left
-    send_to_discord(message_content + message_content_body, webhook_url, server)
+    if len(message_content_body) != 0:
+        send_to_discord(message_content + message_content_body, webhook_url, server)
+
+
+def organize_by_retainer(auction_data):
+    auctions_by_retainer = {}
+    for item_id, details in auction_data.items():
+        retainer_name = details["my_retainer"]
+        if retainer_name not in auctions_by_retainer:
+            auctions_by_retainer[retainer_name] = []
+        auctions_by_retainer[retainer_name].append(details)
+    return auctions_by_retainer
 
 
 def send_to_discord(message, webhook_url, server):
