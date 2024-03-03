@@ -6,7 +6,7 @@ import time
 
 def create_undercut_message(json_response, webhook_url):
     # Start building the message content
-    server = json_response['server']
+    server = json_response["server"]
     message_content = (
         f"Undercuts - {server}\nList of items that are being undercut!\n\n"
     )
@@ -16,35 +16,36 @@ def create_undercut_message(json_response, webhook_url):
     for item_id, details in json_response.get("auction_data", {}).items():
         message_content_body += f"[{details['real_name']}]({details['link']})\n"
         # make sure we dont go over 2000 characters
-        if len(message_content+message_content_body) > 1500:
-            send_to_discord(message_content+message_content_body, webhook_url, server)
+        if len(message_content + message_content_body) > 1500:
+            send_to_discord(message_content + message_content_body, webhook_url, server)
             # reset message content after sending
             message_content_body = ""
     # send final message if anything is left
-    send_to_discord(message_content+message_content_body, webhook_url, server)
+    send_to_discord(message_content + message_content_body, webhook_url, server)
 
 
 def send_to_discord(message, webhook_url, server):
     # Send message
     if len(message) > 0:
         print(f"sending message for {server} undercuts to discord...")
-        req = requests.post(
-            webhook_url, json={"content": message}
-        )
+        req = requests.post(webhook_url, json={"content": message})
         if req.status_code != 204 and req.status_code != 200:
-            print(f"Failed to send message to discord for {server} undercuts: {req.status_code} - {req.text}")
+            print(
+                f"Failed to send message to discord for {server} undercuts: {req.status_code} - {req.text}"
+            )
         else:
             print(f"Message sent for {server} undercuts")
     else:
         print(f"No undercuts found on {server}")
 
-def main():
-    # Load webhook URLs
-    with open("./user_data/config/undercut/webhooks.json") as f:
-        webhooks = json.load(f)
 
+def run_undercut(webhooks):
     for filename in os.listdir("./user_data/undercut"):
         if filename == "example.json":
+            continue
+        # skip when file name not in webhooks
+        if filename.split(".")[0] not in webhooks:
+            print(f"Error: No webhook found for {filename}")
             continue
         if filename.endswith(".json"):
             with open(f"./user_data/undercut/{filename}") as f:
@@ -83,16 +84,29 @@ def main():
                         json=entry,
                     )
                     if response.status_code == 200:
-                        webhook = webhooks.get(entry['server'],None)
+                        webhook = webhooks.get(entry["server"], None)
                         if webhook is None:
                             print(f"Error: No webhook found for {entry['server']}")
                             continue
                         elif not response.json():
-                            print(f"Error: No undercut data found for {entry['server']}")
+                            print(
+                                f"No auctions found or not undercut at all for {json.dumps(entry)}."
+                            )
                             continue
                         create_undercut_message(response.json(), webhook)
                     else:
                         print(f"Error: Failed to get a valid response for {filename}")
+
+
+def main():
+    # Load webhook URLs
+    with open("./user_data/config/undercut/webhooks.json") as f:
+        webhooks = json.load(f)
+
+    while True:
+        run_undercut(webhooks)
+        print("Sleeping for 5 minutes...")
+        time.sleep(300)
 
 
 if __name__ == "__main__":
