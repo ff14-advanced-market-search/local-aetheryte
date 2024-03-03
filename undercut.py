@@ -133,7 +133,7 @@ def run_undercut(webhooks):
                             continue
                         elif not response.json():
                             print(
-                                f"No auctions found or not undercut at all for {json.dumps(entry)}."
+                                f"No auctions found or not undercut at all for | {json.dumps(entry)}"
                             )
                             continue
                         create_undercut_message(response.json(), webhook)
