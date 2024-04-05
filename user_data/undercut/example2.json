@@ -1,0 +1,93 @@
+[
+  {
+    "server": "Leviathan",
+    "add_ids": [],
+    "hq_only": false,
+    "seller_id": "5d974f95bf1527230170dd257095e25ecbaf8bc088a329db6a89dbf095233814",
+    "ignore_ids": [
+      7507,
+      39876,
+      36365,
+      36489,
+      36395,
+      20058
+    ],
+    "ignore_data_after_hours": 24,
+    "ignore_undercuts_with_quantity_over": 40
+  },
+  {
+    "server": "Leviathan",
+    "add_ids": [
+      7507,
+      39876
+    ],
+    "hq_only": true,
+    "seller_id": "5d974f95bf1527230170dd257095e25ecbaf8bc088a329db6a89dbf095233814",
+    "ignore_ids": [
+      -1
+    ],
+    "ignore_data_after_hours": 24,
+    "ignore_undercuts_with_quantity_over": 40
+  },
+  {
+    "server": "Leviathan",
+    "add_ids": [
+      20073,
+      36489
+    ],
+    "hq_only": false,
+    "seller_id": "5d974f95bf1527230170dd257095e25ecbaf8bc088a329db6a89dbf095233814",
+    "ignore_ids": [
+      -1
+    ],
+    "ignore_retainers": [
+      "Mashu"
+    ],
+    "ignore_data_after_hours": 24,
+    "ignore_undercuts_with_quantity_over": 2
+  },
+  {
+    "server": "Leviathan",
+    "add_ids": [
+      36395
+    ],
+    "hq_only": false,
+    "seller_id": "5d974f95bf1527230170dd257095e25ecbaf8bc088a329db6a89dbf095233814",
+    "ignore_ids": [
+      -1
+    ],
+    "ignore_retainers": [
+      "Emmeline"
+    ],
+    "ignore_data_after_hours": 24,
+    "ignore_undercuts_with_quantity_over": 3
+  },
+  {
+    "server": "Leviathan",
+    "add_ids": [
+      33940,
+      39595,
+      20058
+    ],
+    "hq_only": false,
+    "seller_id": "5d974f95bf1527230170dd257095e25ecbaf8bc088a329db6a89dbf095233814",
+    "ignore_ids": [
+      -1
+    ],
+    "ignore_data_after_hours": 24,
+    "ignore_undercuts_with_quantity_over": 1
+  },
+  {
+    "server": "Leviathan",
+    "add_ids": [
+      36395
+    ],
+    "hq_only": false,
+    "seller_id": "5d974f95bf1527230170dd257095e25ecbaf8bc088a329db6a89dbf095233814",
+    "ignore_ids": [
+      -1
+    ],
+    "ignore_data_after_hours": 24,
+    "ignore_undercuts_with_quantity_over": 3
+  }
+]
