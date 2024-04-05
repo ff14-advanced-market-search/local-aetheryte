@@ -1,0 +1,6 @@
+[{
+  "home_server": "Famfrit",
+  "user_auctions": [
+    { "itemID": 21794, "price": 1000000, "desired_state": "below", "hq": false }
+  ]
+}]
