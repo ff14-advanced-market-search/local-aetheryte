@@ -6,8 +6,13 @@
 
 cd local-aetheryte
 pip install -r requirements.txt
-python undercut.py
 ```
+
+Next depending on what alert you want run the python script for that alert:
+- `python ffxiv_pricecheck.py`
+- `python ffxiv_undercut.py`
+- `python wow_pricecheck.py`
+- `python wow_undercut.py`
 
 # FFXIV webhooks setup for messages to different channels
 
