@@ -44,6 +44,7 @@ def simple_snipe(json_data):
 
     return snipe_results
 
+
 def get_update_timers(region, simple_snipe=False):
     print("Getting update timers")
     # get from api every time
@@ -84,7 +85,6 @@ def send_discord_message(message, webhook_url):
     except requests.exceptions.RequestException as ex:
         print("Error sending Discord message: %s", ex)
         return False  # Failed to send the message
-
 
 
 def format_discord_message():
@@ -159,5 +159,3 @@ if __name__ == "__main__":
     format_discord_message()
     # run on schedule
     main()
-
-
