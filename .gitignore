@@ -1,5 +1,5 @@
-user_data/undercut/*.json
-user_data/pricecheck/*.json
+ffxiv_user_data/undercut/*.json
+ffxiv_user_data/pricecheck/*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -3,14 +3,12 @@ import json
 import os
 import time
 
-check_path = "pricecheck"
-
 
 def create_embed(title, description, fields):
     embed = {
         "title": title,
         "description": description,
-        "color": 0x7289DA,  # Blurple color code
+        "color": 0x00FF00,  # You can change this to any color you prefer
         "fields": fields,
         "footer": {
             "text": time.strftime(
@@ -41,36 +39,57 @@ def send_to_discord(embed, webhook_url):
         print(f"Embed sent successfully")
 
 
-def create_pricecheck_message(json_response, webhook_url):
-    title = "Price Alert"
-    description = f"List of items that match your price alert settings"
+def create_undercut_message(json_response, webhook_url):
+    server = json_response["server"]
+    title = f"Undercuts - {server}"
+    description = "List of items that are being undercut!"
     fields = []
 
-    matching = json_response.get("matching", [])
-    # Get rid of "itemName": false
-    matching = list(filter(lambda x: x["itemName"], matching))
+    auctions_by_retainer = organize_by_retainer(json_response.get("auction_data", {}))
 
-    if len(matching) == 0:
-        return
-
-    for match in matching:
-        item_name = match.pop("itemName")
-        desc = (
-            f"[Universalis Link](https://universalis.app/market/{match['itemID']})\n"
-            + f"Server: {match['server']}\n"
-            + f"DC: {match['dc']}\n"
-            + f"Lowest Price: {'{:,}'.format(match['minPrice'])}\n"
-            + f"Quantity: {match['minListingQuantity']}\n"
-            + f"HQ: {match['hq']}"
+    for retainer, details in auctions_by_retainer.items():
+        value = "\n".join(
+            f"[{auction['real_name']}]({auction['link']})" for auction in details
         )
-        fields.append({"name": f"**{item_name}**", "value": desc, "inline": True})
+        fields.append({"name": f"**{retainer}**", "value": value, "inline": True})
 
     embed = create_embed(title, description, fields)
     send_to_discord(embed, webhook_url)
 
 
+## not using embeds, but handles case of too much text
+# def old_create_undercut_message(json_response, webhook_url):
+#     # Start building the message content
+#     server = json_response["server"]
+#     message_content = (
+#         f"Undercuts - {server}\nList of items that are being undercut!\n\n"
+#     )
+#     message_content_body = ""
+#
+#     auctions_by_retainer = organize_by_retainer(json_response.get("auction_data", {}))
+#     # Append information about each undercut item
+#     for retainer, details in auctions_by_retainer.items():
+#         retainer_content_body = f"**{retainer}**\n"
+#         for auction in details:
+#             retainer_content_body += f"[{auction['real_name']}]({auction['link']})\n"
+#
+#         # make sure we dont go over 2000 characters
+#         if len(retainer_content_body) > 1700:
+#             retainer_content_body += f"Too many undercuts on {retainer}, update all items on on this or ignore it!\n"
+#
+#         message_content_body += retainer_content_body
+#         if len(message_content + message_content_body) > 1700:
+#             send_to_discord(message_content + message_content_body, webhook_url, server)
+#             # reset message content after sending
+#             message_content_body = retainer_content_body
+#
+#     # send final message if anything is left
+#     if len(message_content_body) != 0:
+#         send_to_discord(message_content + message_content_body, webhook_url, server)
+
+
 def run_undercut(webhooks):
-    for filename in os.listdir(f"./user_data/{check_path}"):
+    for filename in os.listdir("./ffxiv_user_data/undercut"):
         if filename == "example.json":
             continue
         # skip when file name not in webhooks
@@ -78,7 +97,7 @@ def run_undercut(webhooks):
             print(f"Error: No webhook found for {filename}")
             continue
         if filename.endswith(".json"):
-            with open(f"./user_data/{check_path}/{filename}") as f:
+            with open(f"./ffxiv_user_data/undercut/{filename}") as f:
                 # check that the file is a list
                 try:
                     data = json.load(f)
@@ -90,11 +109,14 @@ def run_undercut(webhooks):
                     continue
 
                 for entry in data:
-                    pricecheck_fields = {
-                        "home_server": str,
-                        "user_auctions": list,
+                    undercut_fields = {
+                        "seller_id": str,
+                        "server": str,
+                        "ignore_ids": list,
+                        "add_ids": list,
+                        "hq_only": bool,
                     }
-                    for field, field_type in pricecheck_fields.items():
+                    for field, field_type in undercut_fields.items():
                         if field not in entry:
                             print(f"Error: {filename} is missing {field}")
                             continue
@@ -104,30 +126,30 @@ def run_undercut(webhooks):
 
                     time.sleep(1)
                     response = requests.post(
-                        "http://api.saddlebagexchange.com/api/pricecheck",
+                        "http://api.saddlebagexchange.com/api/undercut",
                         headers={
                             "Accept": "application/json",
                         },
                         json=entry,
                     )
                     if response.status_code == 200:
-                        webhook = webhooks.get(filename.split(".")[0], None)
+                        webhook = webhooks.get(entry["server"], None)
                         if webhook is None:
                             print(f"Error: No webhook found for {entry['server']}")
                             continue
                         elif not response.json():
                             print(
-                                f"No listings found matching prices for | {json.dumps(entry)}"
+                                f"No auctions found or not undercut at all for | {json.dumps(entry)}"
                             )
                             continue
-                        create_pricecheck_message(response.json(), webhook)
+                        create_undercut_message(response.json(), webhook)
                     else:
                         print(f"Error: Failed to get a valid response for {filename}")
 
 
 def main():
     # Load webhook URLs
-    with open(f"./user_data/config/{check_path}/webhooks.json") as f:
+    with open("./ffxiv_user_data/config/undercut/webhooks.json") as f:
         webhooks = json.load(f)
 
     while True:

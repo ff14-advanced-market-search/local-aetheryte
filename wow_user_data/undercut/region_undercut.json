@@ -1,0 +1,85 @@
+{
+  "region": "NA",
+  "homeRealmID": 76,
+  "addonData": [
+    {
+      "homeRealmName": "119",
+      "region": "US",
+      "user_auctions": [
+        {
+          "itemID": 194020,
+          "price": 38000000,
+          "auctionID": 1466917308
+        },
+        {
+          "itemID": 200470,
+          "price": 150000000,
+          "auctionID": 1466917691
+        }
+      ]
+    },
+    {
+      "homeRealmName": "1263",
+      "region": "US",
+      "user_auctions": []
+    },
+    {
+      "homeRealmName": "1566",
+      "region": "US",
+      "user_auctions": [
+        {
+          "itemID": 206582,
+          "price": 65000000,
+          "auctionID": 1466978377
+        }
+      ]
+    },
+    {
+      "homeRealmName": "1293",
+      "region": "US",
+      "user_auctions": [
+        {
+          "itemID": 200470,
+          "price": 39993100,
+          "auctionID": 1466964208
+        },
+        {
+          "itemID": 194018,
+          "price": 47759700,
+          "auctionID": 1466975290
+        },
+        {
+          "itemID": 194020,
+          "price": 49850200,
+          "auctionID": 1466963394
+        }
+      ]
+    },
+    {
+      "homeRealmName": "1263",
+      "region": "US",
+      "user_auctions": []
+    },
+    {
+      "homeRealmName": "1371",
+      "region": "US",
+      "user_auctions": [
+        {
+          "itemID": 194020,
+          "price": 30000000,
+          "auctionID": 1466923817
+        },
+        {
+          "itemID": 194018,
+          "price": 36505100,
+          "auctionID": 1466925622
+        },
+        {
+          "itemID": 200470,
+          "price": 39995100,
+          "auctionID": 1466924236
+        }
+      ]
+    }
+  ]
+}
