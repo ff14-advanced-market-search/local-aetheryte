@@ -16,7 +16,8 @@ if len(undercut_alert_data) == 0:
     )
     print("Then paste it into user_data/simple/region_undercut.json")
     exit(1)
-region = undercut_alert_data["region"]
+region = undercut_alert_data[0]["region"]
+home_realm_id = undercut_alert_data[0]["homeRealmName"]
 
 try:
     webhook_url = json.load(open("wow_user_data/config/undercut/webhooks.json"))[
@@ -106,7 +107,9 @@ def create_embed(title, description, fields, color="red"):
 
 def format_discord_message():
     global alert_record
-    raw_undercut_data = simple_undercut(undercut_alert_data)
+    raw_undercut_data = simple_undercut(
+        {"region": "NA", "homeRealmID": 76, "addonData": undercut_alert_data}
+    )
     if not raw_undercut_data:
         send_discord_message(
             f"An error occured got empty response {raw_undercut_data}", webhook_url
@@ -146,6 +149,7 @@ def format_discord_message():
                 "red",
             )
             send_to_discord(embed, webhook_url)
+            time.sleep(1)
 
         if len(embed_nf) > 0:
             embed = create_embed(
@@ -155,6 +159,7 @@ def format_discord_message():
                 "green",
             )
             send_to_discord(embed, webhook_url)
+            time.sleep(1)
 
 
 #### MAIN ####
