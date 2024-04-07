@@ -20,21 +20,32 @@ if len(price_alert_data) == 0:
     exit(1)
 region = price_alert_data["region"]
 
-simple_snipe_info = json.load(open("user_data/simple/simple_snipe_info.json"))
-# remove homeRealmName if players insert it from the website
-if "homeRealmName" in simple_snipe_info:
-    del simple_snipe_info["homeRealmName"]
-
 try:
-    webhook_url = json.load(open("wow_user_data/config/pricecheck/webhooks.json"))["webhook"]
+    webhook_url = json.load(open("wow_user_data/config/pricecheck/webhooks.json"))[
+        "webhook"
+    ]
 except FileNotFoundError:
-    print("Error: No webhook file found for pricecheck, add your webhook to wow_user_data/config/pricecheck/webhooks.json")
+    print(
+        "Error: No webhook file found for pricecheck, add your webhook to wow_user_data/config/pricecheck/webhooks.json"
+    )
     exit(1)
 except KeyError:
-    print("Error: No webhook found in wow_user_data/config/pricecheck/webhooks.json add one in")
+    print(
+        "Error: No webhook found in wow_user_data/config/pricecheck/webhooks.json add one in"
+    )
     exit(1)
 
+
+def simple_snipe(json_data):
+    snipe_results = requests.post(
+        "http://api.saddlebagexchange.com/api/wow/regionpricecheck",
+        json=json_data,
+    ).json()
+
+    return snipe_results
+
 def get_update_timers(region, simple_snipe=False):
+    print("Getting update timers")
     # get from api every time
     update_timers = requests.post(
         "http://api.saddlebagexchange.com/api/wow/uploadtimers",
@@ -62,6 +73,7 @@ def get_update_timers(region, simple_snipe=False):
 
     return server_update_times
 
+
 @retry(stop=stop_after_attempt(3))
 def send_discord_message(message, webhook_url):
     try:
@@ -74,14 +86,6 @@ def send_discord_message(message, webhook_url):
         return False  # Failed to send the message
 
 
-
-def simple_snipe(json_data):
-    snipe_results = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/regionpricecheck",
-        json=json_data,
-    ).json()
-
-    return snipe_results
 
 def format_discord_message():
     global alert_record
@@ -131,9 +135,7 @@ def main():
             update_time = get_update_timers(region, True)[0]["lastUploadMinute"]
 
         # check the upload min up 3 to 5 min after the commodities trigger
-        if (
-            update_time + 3 <= current_min <= update_time + 7
-        ):
+        if update_time + 3 <= current_min <= update_time + 7:
             print(
                 f"NOW AT MATCHING UPDATE MIN!!! {datetime.now()}, checking for snipes on {alert_item_ids}"
             )
@@ -146,17 +148,16 @@ def main():
             time.sleep(60)
 
 
-def test():
-    format_discord_message()
-
-
 if not send_discord_message("starting simple alerts", webhook_url):
     print("Failed to send Discord message")
     exit(1)
 else:
     print("Discord message sent successfully")
 
-main()
+if __name__ == "__main__":
+    # run once on start
+    format_discord_message()
+    # run on schedule
+    main()
 
-## for debugging
-# test()
+
