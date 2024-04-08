@@ -8,7 +8,7 @@ cd local-aetheryte
 pip install -r requirements.txt
 ```
 
-Next depending on what alert you want run the python script for that alert:
+Then run the python script for whatever alert you want:
 - `python ffxiv_pricecheck.py`
 - `python ffxiv_undercut.py`
 - `python wow_pricecheck.py`
