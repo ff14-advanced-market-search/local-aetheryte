@@ -21,16 +21,6 @@ def create_embed(title, description, fields):
     return embed
 
 
-def organize_by_retainer(auction_data):
-    auctions_by_retainer = {}
-    for item_id, details in auction_data.items():
-        retainer_name = details["my_retainer"]
-        if retainer_name not in auctions_by_retainer:
-            auctions_by_retainer[retainer_name] = []
-        auctions_by_retainer[retainer_name].append(details)
-    return auctions_by_retainer
-
-
 def send_to_discord(embed, webhook_url):
     # Send message
     print(f"sending embed to discord...")
