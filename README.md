@@ -8,7 +8,9 @@ cd local-aetheryte
 pip install -r requirements.txt
 ```
 
-Then run the python script for whatever alert you want:
+Next add in your json data.
+
+Last run the python script for whatever alert you want:
 - `python ffxiv_pricecheck.py`
 - `python ffxiv_undercut.py`
 - `python wow_pricecheck.py`
