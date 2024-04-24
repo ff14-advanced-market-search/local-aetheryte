@@ -8,7 +8,9 @@ cd local-aetheryte
 pip install -r requirements.txt
 ```
 
-Next add in your json data.
+Next add in your json data:
+- [For wow players](https://github.com/ff14-advanced-market-search/local-aetheryte/blob/main/README.md#wow-setup)
+- [For FFXIV players](https://github.com/ff14-advanced-market-search/local-aetheryte/blob/main/README.md#ffxiv-setup)
 
 Last run the python script for whatever alert you want:
 - `python ffxiv_pricecheck.py`
@@ -16,7 +18,7 @@ Last run the python script for whatever alert you want:
 - `python wow_pricecheck.py`
 - `python wow_undercut.py`
 
-# FFXIV webhooks setup for messages to different channels
+# FFXIV setup
 
 **Note**: this same setup works for the price alert or undercut options, just do everything here for pricealert instead if you want that
 
