@@ -106,6 +106,7 @@ def format_discord_message():
             + "==================================\n"
         )
         if auction not in alert_record:
+            time.sleep(1)
             send_discord_message(message, webhook_url)
             alert_record.append(auction)
 

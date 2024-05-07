@@ -7,7 +7,7 @@ from tenacity import retry, stop_after_attempt
 
 
 print("Sleep 10 sec on start to avoid spamming the api")
-# time.sleep(10)
+time.sleep(10)
 
 #### GLOBALS ####
 alert_record = []
@@ -119,6 +119,7 @@ def format_discord_message():
                 + "==================================\n"
             )
             if auction not in alert_record:
+                time.sleep(1)
                 send_discord_message(message, webhook_url)
                 alert_record.append(auction)
 
