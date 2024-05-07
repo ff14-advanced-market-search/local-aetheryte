@@ -15,7 +15,8 @@ Next add in your json data:
 Last run the python script for whatever alert you want:
 - `python ffxiv_pricecheck.py`
 - `python ffxiv_undercut.py`
-- `python wow_pricecheck.py`
+- `python wow_regionpricecheck.py` # for one config and prices on all servers
+- `python wow_singlepricecheck.py` # for one config and prices on specific servers
 - `python wow_undercut.py`
 
 # FFXIV setup
