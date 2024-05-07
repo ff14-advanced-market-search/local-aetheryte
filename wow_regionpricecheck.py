@@ -11,27 +11,27 @@ time.sleep(10)
 
 #### GLOBALS ####
 alert_record = []
-price_alert_data = json.load(open("wow_user_data/pricecheck/region_snipe.json"))
+price_alert_data = json.load(open("wow_user_data/regionpricecheck/region_snipe.json"))
 if len(price_alert_data) == 0:
     print(
         "Error please generate your snipe data at: https://saddlebagexchange.com/wow/price-alert"
     )
-    print("Then paste it into user_data/simple/region_snipe.json")
+    print("Then paste it into wow_user_data/config/regionpricecheck/single_snipe.json")
     exit(1)
 region = price_alert_data["region"]
 
 try:
-    webhook_url = json.load(open("wow_user_data/config/pricecheck/webhooks.json"))[
-        "webhook"
-    ]
+    webhook_url = json.load(
+        open("wow_user_data/config/regionpricecheck/webhooks.json")
+    )["webhook"]
 except FileNotFoundError:
     print(
-        "Error: No webhook file found for pricecheck, add your webhook to wow_user_data/config/pricecheck/webhooks.json"
+        "Error: No webhook file found for regionpricecheck, add your webhook to wow_user_data/config/regionpricecheck/webhooks.json"
     )
     exit(1)
 except KeyError:
     print(
-        "Error: No webhook found in wow_user_data/config/pricecheck/webhooks.json add one in"
+        "Error: No webhook found in wow_user_data/config/regionpricecheck/webhooks.json add one in"
     )
     exit(1)
 
@@ -45,7 +45,7 @@ def simple_snipe(json_data):
     return snipe_results
 
 
-def get_update_timers(region, simple_snipe=False):
+def get_update_timers(region):
     print("Getting update timers")
     # get from api every time
     update_timers = requests.post(
@@ -54,23 +54,13 @@ def get_update_timers(region, simple_snipe=False):
     ).json()["data"]
 
     # cover specific realms
-    if simple_snipe:
-        if region == "EU":
-            update_id = -2
-        else:
-            update_id = -1
-        server_update_times = [
-            time_data
-            for time_data in update_timers
-            if time_data["dataSetID"] == update_id
-        ]
+    if region == "EU":
+        update_id = -2
     else:
-        server_update_times = [
-            time_data
-            for time_data in update_timers
-            if time_data["dataSetID"] not in [-1, -2] and time_data["region"] == region
-        ]
-        print(server_update_times)
+        update_id = -1
+    server_update_times = [
+        time_data for time_data in update_timers if time_data["dataSetID"] == update_id
+    ]
 
     return server_update_times
 
@@ -114,6 +104,7 @@ def format_discord_message():
             + "==================================\n"
         )
         if auction not in alert_record:
+            time.sleep(1)
             send_discord_message(message, webhook_url)
             alert_record.append(auction)
 
@@ -122,7 +113,7 @@ def format_discord_message():
 def main():
     global alert_record
     alert_item_ids = [item["itemID"] for item in price_alert_data["user_auctions"]]
-    update_time = get_update_timers(region, True)[0]["lastUploadMinute"]
+    update_time = get_update_timers(region)[0]["lastUploadMinute"]
     while True:
         current_min = int(datetime.now().minute)
 
@@ -132,7 +123,7 @@ def main():
             alert_record = []
         # update the update min once per hour
         if current_min == 1:
-            update_time = get_update_timers(region, True)[0]["lastUploadMinute"]
+            update_time = get_update_timers(region)[0]["lastUploadMinute"]
 
         # check the upload min up 3 to 5 min after the commodities trigger
         if update_time + 3 <= current_min <= update_time + 7:
