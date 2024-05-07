@@ -1,7 +1,7 @@
 [
   {
     "region":"EU",
-    "home_realm_name": "Silvermoon",
+    "homeRealmName": "Silvermoon",
     "user_auctions":[
     {"itemID":147428,"price":250000000,"desired_state":"below"},
     {"itemID":118874,"price":1000000000,"desired_state":"below"},
@@ -53,7 +53,7 @@
   },
   {
     "region":"EU",
-    "home_realm_name": "Thrall",
+    "homeRealmName": "Thrall",
     "user_auctions":[
     {"itemID":147428,"price":250000000,"desired_state":"below"},
     {"itemID":118874,"price":1000000000,"desired_state":"below"},
