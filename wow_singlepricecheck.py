@@ -26,16 +26,16 @@ if not isinstance(price_alert_data, list):
 if set(price_alert_data[0].keys()) != {"region", "homeRealmName", "user_auctions"}:
     print(
         "Error: each json in the list for price_alert_data should be a list of items with keys:"
-        +"['region', 'homeRealmName', 'user_auctions']"
+        + "['region', 'homeRealmName', 'user_auctions']"
     )
     exit(1)
 
 region = price_alert_data[0]["region"]
 
 try:
-    webhook_url = json.load(open("wow_user_data/config/singlepricecheck/webhooks.json"))[
-        "webhook"
-    ]
+    webhook_url = json.load(
+        open("wow_user_data/config/singlepricecheck/webhooks.json")
+    )["webhook"]
 except FileNotFoundError:
     print(
         "Error: No webhook file found for singlepricecheck, add your webhook to wow_user_data/config/singlepricecheck/webhooks.json"
@@ -70,9 +70,7 @@ def get_update_timers(region):
     else:
         update_id = -1
     server_update_times = [
-            time_data
-            for time_data in update_timers
-            if time_data["dataSetID"] == update_id
+        time_data for time_data in update_timers if time_data["dataSetID"] == update_id
     ]
 
     return server_update_times
