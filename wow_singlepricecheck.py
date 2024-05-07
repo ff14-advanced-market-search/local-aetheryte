@@ -7,11 +7,11 @@ from tenacity import retry, stop_after_attempt
 
 
 print("Sleep 10 sec on start to avoid spamming the api")
-time.sleep(10)
+# time.sleep(10)
 
 #### GLOBALS ####
 alert_record = []
-price_alert_data = json.load(open("wow_user_data/pricecheck/single_snipe.json"))
+price_alert_data = json.load(open("wow_user_data/singlepricecheck/snipe.json"))
 if len(price_alert_data) == 0:
     print(
         "Error please generate your snipe data at: https://saddlebagexchange.com/wow/price-alert"
@@ -23,7 +23,7 @@ if not isinstance(price_alert_data, list):
     print("Error: price_alert_data should be a list of items")
     exit(1)
 
-if price_alert_data[0].keys() != ["region", "homeRealmName", "user_auctions"]:
+if set(price_alert_data[0].keys()) != {"region", "homeRealmName", "user_auctions"}:
     print(
         "Error: each json in the list for price_alert_data should be a list of items with keys:"
         +"['region', 'homeRealmName', 'user_auctions']"
@@ -126,7 +126,6 @@ def format_discord_message():
 #### MAIN ####
 def main():
     global alert_record
-    alert_item_ids = [item["itemID"] for item in price_alert_data["user_auctions"]]
     update_time = get_update_timers(region)[0]["lastUploadMinute"]
     while True:
         current_min = int(datetime.now().minute)
@@ -142,13 +141,13 @@ def main():
         # check the upload min up 3 to 5 min after the commodities trigger
         if update_time + 3 <= current_min <= update_time + 7:
             print(
-                f"NOW AT MATCHING UPDATE MIN!!! {datetime.now()}, checking for snipes on {alert_item_ids}"
+                f"NOW AT MATCHING UPDATE MIN!!! {datetime.now()}, checking for snipes"
             )
             format_discord_message()
             time.sleep(60)
         else:
             print(
-                f"at {datetime.now()}, waiting for {[update_time]} for {alert_item_ids}"
+                f"Now {datetime.now()}, waiting for min {[update_time]} to run more scans"
             )
             time.sleep(60)
 
