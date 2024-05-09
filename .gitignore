@@ -1,3 +1,4 @@
+test.*
 ffxiv_user_data/undercut/*.json
 ffxiv_user_data/pricecheck/*.json
 
@@ -10,6 +11,8 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.idea
+venv
 .Python
 build/
 develop-eggs/
