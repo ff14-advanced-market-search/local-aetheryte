@@ -34,11 +34,12 @@ def update_user_undercut_data():
     if autoupdate:
         update_region_undercut_json()
     undercut_alert_data = json.load(open("wow_user_data/undercut/region_undercut.json"))
-    if len(undercut_alert_data) == 0:
+    if not undercut_alert_data or len(undercut_alert_data) == 0:
         print(
             "Error please generate your undercut data from our addon: https://www.curseforge.com/wow/addons/saddlebag-exchange"
         )
-        print("Then paste it into user_data/simple/region_undercut.json")
+        print("Then paste it into wow_user_data/undercut/region_undercut.json")
+        print("Or setup automatic updates with wow_user_data/undercut/addon_undercut.json")
         exit(1)
     region = undercut_alert_data[0]["region"]
     home_realm_id = undercut_alert_data[0]["homeRealmName"]
