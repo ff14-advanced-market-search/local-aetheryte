@@ -14,6 +14,7 @@ try:
     config_data = json.load(open("wow_user_data/config/undercut/webhooks.json"))
     webhook_url = config_data["webhook"]
     autoupdate = config_data["autoupdate"]
+    include_sold_not_found = config_data["include_sold_not_found"]
 except FileNotFoundError:
     print(
         "Error: No webhook file found for undercut, add your webhook to wow_user_data/config/undercut/webhooks.json"
@@ -168,7 +169,7 @@ def format_discord_message():
                 send_to_discord(embed, webhook_url)
             time.sleep(1)
 
-        if len(embed_nf) > 0:
+        if len(embed_nf) > 0 and include_sold_not_found:
             # split embed_uc into lists no longer than 25
             split_nf = split_list(embed_nf, 25)
             for nf in split_nf:
