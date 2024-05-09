@@ -2,8 +2,21 @@ import os, json
 from slpp import slpp as lua
 
 
-# Specify the base directory and target Lua file name
-base_directory = r"E:\World of Warcraft\_retail_\WTF\Account\12345678#2"
+# Safely load the JSON configuration
+try:
+    # Specify the base directory and target Lua file name
+    #   ex: r"E:\World of Warcraft\_retail_\WTF\Account\12345678#2"
+    config_path = os.path.join(os.getcwd(), "wow_user_data", "undercut", "addon_undercut.json")
+    with open(config_path, 'r', encoding='utf-8') as file:
+        config = json.load(file)
+        base_directory = config.get("base_directory")  # Using .get() to avoid KeyError if the key doesn't exist
+except FileNotFoundError:
+    print(f"Configuration file not found at {config_path}. Please check the path and try again.")
+except json.JSONDecodeError:
+    print("Error decoding JSON. Please check the contents of the configuration file.")
+
+# Print the base directory for verification
+print(f"Base directory from configuration: {base_directory}")
 
 def read_and_parse_lua_file(file_path):
     """

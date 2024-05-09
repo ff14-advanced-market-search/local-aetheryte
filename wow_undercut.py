@@ -4,25 +4,16 @@ import os, json, time
 from datetime import datetime
 import requests
 
+from wow_auto_undercut_update import update_region_undercut_json
+
 print("Sleep 10 sec on start to avoid spamming the api")
 time.sleep(10)
 
 #### GLOBALS ####
-alert_record = []
-undercut_alert_data = json.load(open("wow_user_data/undercut/region_undercut.json"))
-if len(undercut_alert_data) == 0:
-    print(
-        "Error please generate your undercut data from our addon: https://www.curseforge.com/wow/addons/saddlebag-exchange"
-    )
-    print("Then paste it into user_data/simple/region_undercut.json")
-    exit(1)
-region = undercut_alert_data[0]["region"]
-home_realm_id = undercut_alert_data[0]["homeRealmName"]
-
 try:
-    webhook_url = json.load(open("wow_user_data/config/undercut/webhooks.json"))[
-        "webhook"
-    ]
+    config_data = json.load(open("wow_user_data/config/undercut/webhooks.json"))
+    webhook_url = config_data["webhook"]
+    autoupdate = config_data["autoupdate"]
 except FileNotFoundError:
     print(
         "Error: No webhook file found for undercut, add your webhook to wow_user_data/config/undercut/webhooks.json"
@@ -34,6 +25,18 @@ except KeyError:
     )
     exit(1)
 
+alert_record = []
+if autoupdate:
+    update_region_undercut_json()
+undercut_alert_data = json.load(open("wow_user_data/undercut/region_undercut.json"))
+if len(undercut_alert_data) == 0:
+    print(
+        "Error please generate your undercut data from our addon: https://www.curseforge.com/wow/addons/saddlebag-exchange"
+    )
+    print("Then paste it into user_data/simple/region_undercut.json")
+    exit(1)
+region = undercut_alert_data[0]["region"]
+home_realm_id = undercut_alert_data[0]["homeRealmName"]
 
 def simple_undercut(json_data):
     snipe_results = requests.post(
@@ -76,7 +79,7 @@ def get_update_timers(region, simple_undercut=False):
 
 def send_to_discord(embed, webhook_url):
     # Send message
-    print(f"sending embed to discord...")
+    # print(f"sending embed to discord...")
     req = requests.post(webhook_url, json={"embeds": [embed]})
     if req.status_code != 204 and req.status_code != 200:
         print(f"Failed to send embed to discord: {req.status_code} - {req.text}")
@@ -183,6 +186,8 @@ def main():
             print(
                 f"NOW AT MATCHING UPDATE MIN!!! {datetime.now()}, checking for undercuts"
             )
+            if autoupdate:
+                update_region_undercut_json()
             format_discord_message()
             time.sleep(60)
         else:
