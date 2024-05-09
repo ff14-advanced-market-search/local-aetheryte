@@ -1,3 +1,4 @@
 {
-	"webhook": "https://discord.com/api/webhooks/1234567890/foobar"
+	"webhook": "https://discord.com/api/webhooks/1234567890/foobar",
+	"autoupdate": false
 }

@@ -4,25 +4,16 @@ import os, json, time
 from datetime import datetime
 import requests
 
+from wow_auto_undercut_update import update_region_undercut_json
+
 print("Sleep 10 sec on start to avoid spamming the api")
 time.sleep(10)
 
 #### GLOBALS ####
-alert_record = []
-undercut_alert_data = json.load(open("wow_user_data/undercut/region_undercut.json"))
-if len(undercut_alert_data) == 0:
-    print(
-        "Error please generate your undercut data from our addon: https://www.curseforge.com/wow/addons/saddlebag-exchange"
-    )
-    print("Then paste it into user_data/simple/region_undercut.json")
-    exit(1)
-region = undercut_alert_data[0]["region"]
-home_realm_id = undercut_alert_data[0]["homeRealmName"]
-
 try:
-    webhook_url = json.load(open("wow_user_data/config/undercut/webhooks.json"))[
-        "webhook"
-    ]
+    config_data = json.load(open("wow_user_data/config/undercut/webhooks.json"))
+    webhook_url = config_data["webhook"]
+    autoupdate = config_data["autoupdate"]
 except FileNotFoundError:
     print(
         "Error: No webhook file found for undercut, add your webhook to wow_user_data/config/undercut/webhooks.json"
@@ -34,6 +25,24 @@ except KeyError:
     )
     exit(1)
 
+alert_record = []
+
+def update_user_undercut_data():
+    global undercut_alert_data
+    global region
+    global home_realm_id
+    if autoupdate:
+        update_region_undercut_json()
+    undercut_alert_data = json.load(open("wow_user_data/undercut/region_undercut.json"))
+    if not undercut_alert_data or len(undercut_alert_data) == 0:
+        print(
+            "Error please generate your undercut data from our addon: https://www.curseforge.com/wow/addons/saddlebag-exchange"
+        )
+        print("Then paste it into wow_user_data/undercut/region_undercut.json")
+        print("Or setup automatic updates with wow_user_data/undercut/addon_undercut.json")
+        exit(1)
+    region = undercut_alert_data[0]["region"]
+    home_realm_id = undercut_alert_data[0]["homeRealmName"]
 
 def simple_undercut(json_data):
     snipe_results = requests.post(
@@ -76,7 +85,7 @@ def get_update_timers(region, simple_undercut=False):
 
 def send_to_discord(embed, webhook_url):
     # Send message
-    print(f"sending embed to discord...")
+    # print(f"sending embed to discord...")
     req = requests.post(webhook_url, json={"embeds": [embed]})
     if req.status_code != 204 and req.status_code != 200:
         print(f"Failed to send embed to discord: {req.status_code} - {req.text}")
@@ -104,11 +113,16 @@ def create_embed(title, description, fields, color="red"):
     }
     return embed
 
+def split_list(input_list, max_length):
+    return [input_list[i:i + max_length] for i in range(0, len(input_list), max_length)]
 
 def format_discord_message():
     global alert_record
+    # update to latest data
+    update_user_undercut_data()
+    # note that the global region and homeRealmID are legacy dummy data and dont matter
     raw_undercut_data = simple_undercut(
-        {"region": "NA", "homeRealmID": 76, "addonData": undercut_alert_data}
+        {"region": "foo", "homeRealmID": 1, "addonData": undercut_alert_data}
     )
     if not raw_undercut_data:
         send_discord_message(
@@ -142,24 +156,30 @@ def format_discord_message():
 
         # send message for each realm
         if len(embed_uc) > 0:
-            embed = create_embed(
-                "Undercuts",
-                f"List of your items that are undercut!\nRealm: {realm}\nRegion: {region}\n",
-                embed_uc,
-                "red",
-            )
-            send_to_discord(embed, webhook_url)
+            # split embed_uc into lists no longer than 25
+            split_uc = split_list(embed_uc,25)
+            for uc in split_uc:
+                embed = create_embed(
+                    "Undercuts",
+                    f"List of your items that are undercut!\nRealm: {realm}\nRegion: {region}\n",
+                    uc,
+                    "red",
+                )
+                send_to_discord(embed, webhook_url)
             time.sleep(1)
 
         if len(embed_nf) > 0:
-            embed = create_embed(
-                "Sold, Expired or Not Found",
-                f"List of items with price levels not found in the blizzard api data.\nRealm: {realm}\nRegion: {region}\n",
-                embed_nf,
-                "green",
-            )
-            send_to_discord(embed, webhook_url)
-            time.sleep(1)
+            # split embed_uc into lists no longer than 25
+            split_nf = split_list(embed_nf, 25)
+            for nf in split_nf:
+                embed = create_embed(
+                    "Sold, Expired or Not Found",
+                    f"List of items with price levels not found in the blizzard api data.\nRealm: {realm}\nRegion: {region}\n",
+                    nf,
+                    "green",
+                )
+                send_to_discord(embed, webhook_url)
+                time.sleep(1)
 
 
 #### MAIN ####
@@ -183,6 +203,8 @@ def main():
             print(
                 f"NOW AT MATCHING UPDATE MIN!!! {datetime.now()}, checking for undercuts"
             )
+            if autoupdate:
+                update_region_undercut_json()
             format_discord_message()
             time.sleep(60)
         else:
