@@ -1,6 +1,13 @@
 test.*
+
 ffxiv_user_data/undercut/*.json
 ffxiv_user_data/pricecheck/*.json
+ffxiv_user_data/config/*.json
+
+wow_user_data/undercut/*.json
+wow_user_data/singlepricecheck/*.json
+wow_user_data/regionpricecheck/*.json
+wow_user_data/config/*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
