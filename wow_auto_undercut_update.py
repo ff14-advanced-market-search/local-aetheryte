@@ -75,4 +75,4 @@ def update_region_undercut_json():
         print("Lua file not found.")
 
 
-update_region_undercut_json()
+# update_region_undercut_json()

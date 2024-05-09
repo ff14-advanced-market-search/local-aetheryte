@@ -26,17 +26,22 @@ except KeyError:
     exit(1)
 
 alert_record = []
-if autoupdate:
-    update_region_undercut_json()
-undercut_alert_data = json.load(open("wow_user_data/undercut/region_undercut.json"))
-if len(undercut_alert_data) == 0:
-    print(
-        "Error please generate your undercut data from our addon: https://www.curseforge.com/wow/addons/saddlebag-exchange"
-    )
-    print("Then paste it into user_data/simple/region_undercut.json")
-    exit(1)
-region = undercut_alert_data[0]["region"]
-home_realm_id = undercut_alert_data[0]["homeRealmName"]
+
+def update_user_undercut_data():
+    global undercut_alert_data
+    global region
+    global home_realm_id
+    if autoupdate:
+        update_region_undercut_json()
+    undercut_alert_data = json.load(open("wow_user_data/undercut/region_undercut.json"))
+    if len(undercut_alert_data) == 0:
+        print(
+            "Error please generate your undercut data from our addon: https://www.curseforge.com/wow/addons/saddlebag-exchange"
+        )
+        print("Then paste it into user_data/simple/region_undercut.json")
+        exit(1)
+    region = undercut_alert_data[0]["region"]
+    home_realm_id = undercut_alert_data[0]["homeRealmName"]
 
 def simple_undercut(json_data):
     snipe_results = requests.post(
@@ -110,8 +115,11 @@ def create_embed(title, description, fields, color="red"):
 
 def format_discord_message():
     global alert_record
+    # update to latest data
+    update_user_undercut_data()
+    # note that the global region and homeRealmID are legacy dummy data and dont matter
     raw_undercut_data = simple_undercut(
-        {"region": "NA", "homeRealmID": 76, "addonData": undercut_alert_data}
+        {"region": "foo", "homeRealmID": 1, "addonData": undercut_alert_data}
     )
     if not raw_undercut_data:
         send_discord_message(
