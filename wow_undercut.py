@@ -112,6 +112,8 @@ def create_embed(title, description, fields, color="red"):
     }
     return embed
 
+def split_list(input_list, max_length):
+    return [input_list[i:i + max_length] for i in range(0, len(input_list), max_length)]
 
 def format_discord_message():
     global alert_record
@@ -153,24 +155,30 @@ def format_discord_message():
 
         # send message for each realm
         if len(embed_uc) > 0:
-            embed = create_embed(
-                "Undercuts",
-                f"List of your items that are undercut!\nRealm: {realm}\nRegion: {region}\n",
-                embed_uc,
-                "red",
-            )
-            send_to_discord(embed, webhook_url)
+            # split embed_uc into lists no longer than 25
+            split_uc = split_list(embed_uc,25)
+            for uc in split_uc:
+                embed = create_embed(
+                    "Undercuts",
+                    f"List of your items that are undercut!\nRealm: {realm}\nRegion: {region}\n",
+                    uc,
+                    "red",
+                )
+                send_to_discord(embed, webhook_url)
             time.sleep(1)
 
         if len(embed_nf) > 0:
-            embed = create_embed(
-                "Sold, Expired or Not Found",
-                f"List of items with price levels not found in the blizzard api data.\nRealm: {realm}\nRegion: {region}\n",
-                embed_nf,
-                "green",
-            )
-            send_to_discord(embed, webhook_url)
-            time.sleep(1)
+            # split embed_uc into lists no longer than 25
+            split_nf = split_list(embed_nf, 25)
+            for nf in split_nf:
+                embed = create_embed(
+                    "Sold, Expired or Not Found",
+                    f"List of items with price levels not found in the blizzard api data.\nRealm: {realm}\nRegion: {region}\n",
+                    nf,
+                    "green",
+                )
+                send_to_discord(embed, webhook_url)
+                time.sleep(1)
 
 
 #### MAIN ####
