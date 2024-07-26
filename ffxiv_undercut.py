@@ -110,7 +110,7 @@ def run_undercut(webhooks):
 
                 for entry in data:
                     undercut_fields = {
-                        "seller_id": str,
+                        "retainer_names": list,
                         "server": str,
                         "ignore_ids": list,
                         "add_ids": list,
