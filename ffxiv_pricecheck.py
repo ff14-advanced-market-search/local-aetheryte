@@ -58,7 +58,7 @@ def create_pricecheck_message(json_response, webhook_url):
     embed = create_embed(title, description, fields)
     send_to_discord(embed, webhook_url)
 
-
+# cr Refactor this function to reduce its Cognitive Complexity from 41 to the 15 allowed.
 def run_undercut(webhooks):
     for filename in os.listdir(f"./ffxiv_user_data/{check_path}"):
         if filename == "example.json":
