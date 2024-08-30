@@ -74,12 +74,12 @@ def check_auction_is_new(auction):
                 existing_entry['ppu'] == ppu and
                 existing_entry['undercut_retainer'] == undercut_retainer):
                 print(f"{real_name} -- Exact match found")
-                isNewUndercut = False
+                is_new_undercut = False
             else:
-                isNewUndercut = True
+                is_new_undercut = True
                 print(f"{real_name} -- New undercut data")
         else:
-            isNewUndercut = True
+            is_new_undercut = True
             print(f"{real_name} -- First undercut")
         
         # Update localdata with the latest information
@@ -89,7 +89,7 @@ def check_auction_is_new(auction):
             'undercut_retainer': undercut_retainer
         }
         
-        return isNewUndercut
+        return is_new_undercut
     else:
         # Always return True if suppressing repeats is disabled
         return True
