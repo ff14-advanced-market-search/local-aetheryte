@@ -3,6 +3,24 @@ import json
 import os
 import time
 
+###### CONFIGURATION ITEMS
+# Option to @mention target user or role
+# Populate with your own discord tag e.g. "<@114321431933142431>\n"
+discordTag = ""
+# Option to 'remember' last undercut and NOT repeat undercut messages
+suppressRepeats = True
+# Format to be used in the undercut message. This accepts markdown formatting.
+# Accepted variables:
+# - {item_name} - Name of the item
+# - {link} - Universalis link to the item
+# - {my_ppu} - Your current price per unit
+# - {ppu} - The undercut price per unit
+# - {undercut_retainer} - The retainer that undercut you
+# DEFAULT FORMAT: "[{item_name}]({link})"
+# Example: "[{item_name}]({link}) — Mine: {my_ppu}, {undercut_retainer}: {ppu}"
+undercut_message_template = "[{item_name}]({link})"
+
+localdata = {}
 
 def create_embed(title, description, fields):
     embed = {
@@ -32,12 +50,49 @@ def organize_by_retainer(auction_data):
 def send_to_discord(embed, webhook_url):
     # Send message
     print(f"sending embed to discord...")
-    req = requests.post(webhook_url, json={"embeds": [embed]})
+    req = requests.post(webhook_url, json={"embeds": [embed], "content": discordTag})
     if req.status_code != 204 and req.status_code != 200:
         print(f"Failed to send embed to discord: {req.status_code} - {req.text}")
     else:
         print(f"Embed sent successfully")
 
+
+def check_auction_is_new(auction):
+    if suppressRepeats:
+        real_name = auction['real_name']
+        my_ppu = auction['my_ppu']
+        ppu = auction['ppu']
+        undercut_retainer = auction['undercut_retainer']
+
+        # Check if the entry exists in localdata
+        if real_name in localdata:
+            # Get the existing entry
+            existing_entry = localdata[real_name]
+            
+            # Check if all attributes match
+            if (existing_entry['my_ppu'] == my_ppu and
+                existing_entry['ppu'] == ppu and
+                existing_entry['undercut_retainer'] == undercut_retainer):
+                print(f"{real_name} -- Exact match found")
+                isNewUndercut = False
+            else:
+                isNewUndercut = True
+                print(f"{real_name} -- New undercut data")
+        else:
+            isNewUndercut = True
+            print(f"{real_name} -- First undercut")
+        
+        # Update localdata with the latest information
+        localdata[real_name] = {
+            'my_ppu': my_ppu,
+            'ppu': ppu,
+            'undercut_retainer': undercut_retainer
+        }
+        
+        return isNewUndercut
+    else:
+        # Always return True if suppressing repeats is disabled
+        return True
 
 def create_undercut_message(json_response, webhook_url):
     server = json_response["server"]
@@ -48,13 +103,16 @@ def create_undercut_message(json_response, webhook_url):
     auctions_by_retainer = organize_by_retainer(json_response.get("auction_data", {}))
 
     for retainer, details in auctions_by_retainer.items():
-        value = "\n".join(
-            f"[{auction['real_name']}]({auction['link']})" for auction in details
-        )
-        fields.append({"name": f"**{retainer}**", "value": value, "inline": True})
-
-    embed = create_embed(title, description, fields)
-    send_to_discord(embed, webhook_url)
+        values = []
+        for auction in details:
+            if check_auction_is_new(auction):
+                values.append(f"[{auction['real_name']}]({auction['link']}) — Mine: {auction['my_ppu']}, {auction['undercut_retainer']}: {auction['ppu']}")
+        value = "\n".join(values)
+        if values:
+            fields.append({"name": f"**{retainer}**", "value": value, "inline": True})
+    if fields:
+        embed = create_embed(title, description, fields)
+        send_to_discord(embed, webhook_url)
 
 
 ## not using embeds, but handles case of too much text
