@@ -5,6 +5,14 @@ import time
 
 check_path = "pricecheck"
 
+###### CONFIGURATION ITEMS
+# Option to @mention target user or role
+# Populate with your own discord tag e.g. "<@114321431933142431>\n"
+discordTag = ""
+# Option to 'remember' last undercut and NOT repeat undercut messages
+suppressRepeats = True
+
+localdata = {}
 
 def create_embed(title, description, fields):
     embed = {
@@ -24,12 +32,50 @@ def create_embed(title, description, fields):
 def send_to_discord(embed, webhook_url):
     # Send message
     print(f"sending embed to discord...")
-    req = requests.post(webhook_url, json={"embeds": [embed]})
+    req = requests.post(webhook_url, json={"embeds": [embed], "content": discordTag})
     if req.status_code != 204 and req.status_code != 200:
         print(f"Failed to send embed to discord: {req.status_code} - {req.text}")
     else:
         print(f"Embed sent successfully")
 
+def check_for_new_matches(matches):
+    if not suppressRepeats:
+        # Do not perform filter checks if suppression is disabled
+        return matches
+    
+    new_alerts = []
+    
+    for match in matches:
+        itemId = match['itemID']
+        itemName = match['itemName']
+        server = match['server']
+        minPrice = match['minPrice']
+        minListingQuantity = match['minListingQuantity']
+        match_desire = match['match_desire']
+        
+        if itemId in localdata:
+            existing = localdata[itemId]
+            if (existing['server'] == server and
+                existing['minPrice'] == minPrice and
+                existing['minListingQuantity'] == minListingQuantity and
+                existing['match_desire'] == match_desire):
+                print(f"{itemName} -- Exact match found")
+            else:
+                print(f"{itemName} -- New sale alert")
+                new_alerts.append(match)
+        else:
+            print(f"{itemName} -- First sale alert")
+            new_alerts.append(match)
+        
+        # Update localdata with the latest information
+        localdata[itemId] = {
+            'server': server,
+            'minPrice': minPrice,
+            'minListingQuantity': minListingQuantity,
+            'match_desire': match_desire
+        }
+        
+    return new_alerts
 
 def create_pricecheck_message(json_response, webhook_url):
     title = "Price Alert"
@@ -39,6 +85,9 @@ def create_pricecheck_message(json_response, webhook_url):
     matching = json_response.get("matching", [])
     # Get rid of "itemName": false
     matching = list(filter(lambda x: x["itemName"], matching))
+
+    # Perform suppression checks
+    matching = check_for_new_matches(matching)
 
     if len(matching) == 0:
         return
