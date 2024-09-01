@@ -57,17 +57,18 @@ def send_to_discord(embed, webhook_url):
         print(f"Embed sent successfully")
 
 
-def check_auction_is_new(auction):
+def check_auction_is_new(auction, server):
     if suppressRepeats:
         real_name = auction['real_name']
         my_ppu = auction['my_ppu']
         ppu = auction['ppu']
         undercut_retainer = auction['undercut_retainer']
+        localdataKey = f"{real_name}-{server}"
 
         # Check if the entry exists in localdata
-        if real_name in localdata:
+        if localdataKey in localdata:
             # Get the existing entry
-            existing_entry = localdata[real_name]
+            existing_entry = localdata[localdataKey]
             
             # Check if all attributes match
             if (existing_entry['my_ppu'] == my_ppu and
@@ -83,7 +84,7 @@ def check_auction_is_new(auction):
             print(f"{real_name} -- First undercut")
         
         # Update localdata with the latest information
-        localdata[real_name] = {
+        localdata[localdataKey] = {
             'my_ppu': my_ppu,
             'ppu': ppu,
             'undercut_retainer': undercut_retainer
@@ -105,7 +106,7 @@ def create_undercut_message(json_response, webhook_url):
     for retainer, details in auctions_by_retainer.items():
         values = []
         for auction in details:
-            if check_auction_is_new(auction):
+            if check_auction_is_new(auction, server):
                 values.append(f"[{auction['real_name']}]({auction['link']}) — Mine: {auction['my_ppu']}, {auction['undercut_retainer']}: {auction['ppu']}")
         value = "\n".join(values)
         if values:
