@@ -69,6 +69,7 @@ def get_update_timers(region):
 def send_discord_message(message, webhook_url):
     try:
         json_data = {"content": message}
+        time.sleep(1)
         response = requests.post(webhook_url, json=json_data)
         response.raise_for_status()  # Raise an exception for non-2xx status codes
         return True  # Message sent successfully
