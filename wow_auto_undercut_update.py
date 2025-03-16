@@ -6,29 +6,36 @@ from slpp import slpp as lua
 try:
     # Specify the base directory and target Lua file name
     #   ex: r"E:\World of Warcraft\_retail_\WTF\Account\12345678#2"
-    config_path = os.path.join(os.getcwd(), "wow_user_data", "undercut", "addon_undercut.json")
-    with open(config_path, 'r', encoding='utf-8') as file:
+    config_path = os.path.join(
+        os.getcwd(), "wow_user_data", "undercut", "addon_undercut.json"
+    )
+    with open(config_path, "r", encoding="utf-8") as file:
         config = json.load(file)
-        base_directory = config.get("base_directory")  # Using .get() to avoid KeyError if the key doesn't exist
+        base_directory = config.get(
+            "base_directory"
+        )  # Using .get() to avoid KeyError if the key doesn't exist
 except FileNotFoundError:
-    print(f"Configuration file not found at {config_path}. Please check the path and try again.")
+    print(
+        f"Configuration file not found at {config_path}. Please check the path and try again."
+    )
 except json.JSONDecodeError:
     print("Error decoding JSON. Please check the contents of the configuration file.")
 
 # Print the base directory for verification
 print(f"Base directory from configuration: {base_directory}")
 
+
 def read_and_parse_lua_file(file_path):
     """
     Read and parse a Lua file to a Python dictionary.
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             lua_data = file.read()
 
         # Remove the variable declaration if it's present to ensure proper parsing
-        if 'UndercutJsonTable =' in lua_data:
-            lua_data = lua_data.split('UndercutJsonTable =', 1)[1].strip()
+        if "UndercutJsonTable =" in lua_data:
+            lua_data = lua_data.split("UndercutJsonTable =", 1)[1].strip()
 
         # Decode Lua table to Python dictionary
         raw_undercut_data = lua.decode(lua_data)
@@ -38,7 +45,7 @@ def read_and_parse_lua_file(file_path):
 
         undercut_data = []
         for _, value in raw_undercut_data.items():
-            value['homeRealmName'] = str(value['homeRealmName'])
+            value["homeRealmName"] = str(value["homeRealmName"])
             undercut_data.append(value)
 
         return undercut_data
@@ -47,9 +54,22 @@ def read_and_parse_lua_file(file_path):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+
 def update_region_undercut_json():
     # Find the Lua file
-    lua_file_path = os.path.join(base_directory, "SavedVariables", "SaddlebagExchangeWoW.lua")
+    """Updates the region undercut JSON file by converting Lua table data to a JSON format.
+    Parameters:
+        - None
+    Returns:
+        - None
+    Processing Logic:
+        - The function searches for a specific Lua file in the defined base directory.
+        - It parses the Lua file and converts its data into a JSON format.
+        - The output JSON data is stored in a predefined directory, creating the directory if it doesn't exist.
+        - If the Lua file is not found, a message is printed indicating this."""
+    lua_file_path = os.path.join(
+        base_directory, "SavedVariables", "SaddlebagExchangeWoW.lua"
+    )
 
     # Check if the file was found and parse it
     if lua_file_path:
@@ -69,7 +89,7 @@ def update_region_undercut_json():
         os.makedirs(output_dir, exist_ok=True)
 
         # Write JSON data to the file
-        with open(output_path, 'w', encoding='utf-8') as file:
+        with open(output_path, "w", encoding="utf-8") as file:
             file.write(json_output)
     else:
         print("Lua file not found.")

@@ -57,6 +57,15 @@ def simple_snipe(json_data):
 
 
 def get_update_timers(region):
+    """Get update timers for a specific region by querying an API.
+    Parameters:
+        - region (str): The region for which update timers are to be fetched. Can be either "EU" or another value.
+    Returns:
+        - list: A list of server update times filtered by the specified region's update ID.
+    Processing Logic:
+        - Fetches data from a specified API endpoint using a POST request.
+        - Filters the returned data based on the region to either include EU specific or generic update timers.
+    """
     print("Getting update timers")
     # get from api every time
     update_timers = requests.post(
@@ -78,6 +87,17 @@ def get_update_timers(region):
 
 @retry(stop=stop_after_attempt(3))
 def send_discord_message(message, webhook_url):
+    """Send a message to a Discord channel using a webhook.
+    Parameters:
+        - message (str): The message content to send to Discord.
+        - webhook_url (str): The URL of the Discord webhook to use for sending the message.
+    Returns:
+        - bool: True if the message was sent successfully, False otherwise.
+    Processing Logic:
+        - The function uses `requests.post` to send a message via a Discord webhook.
+        - It raises an exception for non-2xx HTTP status codes to ensure the request was successful.
+        - If an exception occurs during the request, it logs the error and returns False.
+    """
     try:
         json_data = {"content": message}
         response = requests.post(webhook_url, json=json_data)
@@ -89,6 +109,15 @@ def send_discord_message(message, webhook_url):
 
 
 def format_discord_message():
+    """Format and send a message to Discord containing information about matching snipes found in the price alert data.
+    Parameters:
+        - None
+    Returns:
+        - None
+    Processing Logic:
+        - Iterates over `price_alert_data` to filter and sum matching snipe items by realm.
+        - Sends a message to Discord only if there are matching snipes.
+        - Ensures each auction is sent only once by checking against `alert_record`."""
     global alert_record
     matching_snipes = {}
     for single_realm_snipe in price_alert_data:
@@ -124,6 +153,16 @@ def format_discord_message():
 
 #### MAIN ####
 def main():
+    """Main control loop for monitoring and updating records based on time intervals.
+    Parameters:
+        None
+    Returns:
+        None
+    Processing Logic:
+        - Clears the `alert_record` every hour when the current minute is 0.
+        - Updates `update_time` once per hour when the current minute is 1.
+        - Executes `format_discord_message` if the current minute falls within 3 to 7 minutes after `update_time`.
+    """
     global alert_record
     update_time = get_update_timers(region)[0]["lastUploadMinute"]
     while True:
