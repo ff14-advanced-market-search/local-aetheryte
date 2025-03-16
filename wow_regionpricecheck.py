@@ -46,6 +46,14 @@ def simple_snipe(json_data):
 
 
 def get_update_timers(region):
+    """Get update timers for a specific region by querying an API.
+    Parameters:
+        - region (str): The region for which update timers are to be fetched. Can be either "EU" or another value.
+    Returns:
+        - list: A list of server update times filtered by the specified region's update ID.
+    Processing Logic:
+        - Fetches data from a specified API endpoint using a POST request.
+        - Filters the returned data based on the region to either include EU specific or generic update timers."""
     print("Getting update timers")
     # get from api every time
     update_timers = requests.post(
@@ -67,6 +75,16 @@ def get_update_timers(region):
 
 @retry(stop=stop_after_attempt(3))
 def send_discord_message(message, webhook_url):
+    """Send a message to a Discord channel using a webhook.
+    Parameters:
+        - message (str): The message content to be sent to the Discord channel.
+        - webhook_url (str): The webhook URL for the target Discord channel.
+    Returns:
+        - bool: True if the message was sent successfully, False otherwise.
+    Processing Logic:
+        - Introduces a delay of 1 second before attempting to send the message.
+        - Raises an exception for any response with a non-2xx status code.
+        - Catches request exceptions and logs an error message."""
     try:
         json_data = {"content": message}
         time.sleep(1)
@@ -79,6 +97,16 @@ def send_discord_message(message, webhook_url):
 
 
 def format_discord_message():
+    """Format and send Discord messages for auction snipes.
+    Parameters:
+        - None
+    Returns:
+        - None
+    Processing Logic:
+        - Retrieves snipe data using the `simple_snipe` function and `price_alert_data`.
+        - Sends an error message to Discord if the snipe data is empty.
+        - Checks for "matching" snipes and sends appropriate messages if none are found or the list is empty.
+        - Formats a message for each matching auction and sends it to Discord unless it has been recorded already."""
     global alert_record
     snipe_data = simple_snipe(price_alert_data)
     if not snipe_data:
@@ -112,6 +140,16 @@ def format_discord_message():
 
 #### MAIN ####
 def main():
+    """Main function to monitor auction alerts and send notifications through Discord.
+    Parameters:
+        - None
+    Returns:
+        - None
+    Processing Logic:
+        - Clears the alert record at the start of each hour.
+        - Updates the upload time one minute after the start of each hour.
+        - Compares current time to designated upload minutes to trigger alert checks.
+        - Sends a formatted Discord message when the current minute matches the designated update minute range."""
     global alert_record
     alert_item_ids = [item["itemID"] for item in price_alert_data["user_auctions"]]
     update_time = get_update_timers(region)[0]["lastUploadMinute"]

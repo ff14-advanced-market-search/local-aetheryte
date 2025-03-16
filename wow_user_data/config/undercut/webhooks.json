@@ -1,5 +1,0 @@
-{
-	"webhook": "https://discord.com/api/webhooks/1234567890/foobar",
-	"autoupdate": false,
-	"include_sold_not_found": false
-}

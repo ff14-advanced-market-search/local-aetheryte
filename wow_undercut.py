@@ -29,6 +29,16 @@ except KeyError:
 alert_record = []
 
 def update_user_undercut_data():
+    """Updates the user undercut data from a specified JSON file.
+    Parameters:
+        None
+    Returns:
+        None
+    Processing Logic:
+        - Utilizes global variables `undercut_alert_data`, `region`, and `home_realm_id`.
+        - Conducts an automatic update if `autoupdate` is enabled.
+        - Loads data from 'wow_user_data/undercut/region_undercut.json'.
+        - Exits with an error message if the JSON data is missing or empty."""
     global undercut_alert_data
     global region
     global home_realm_id
@@ -55,6 +65,16 @@ def simple_undercut(json_data):
 
 
 def get_update_timers(region, simple_undercut=False):
+    """Fetch update timers for specified region, optionally using a simplified undercut logic.
+    Parameters:
+        - region (str): Region for which to fetch update timers (e.g., 'EU', 'US').
+        - simple_undercut (bool, optional): If True, apply a simplified undercut logic affecting the dataset ID filtering.
+    Returns:
+        - list: A list of server update timers relevant to the provided region and logic.
+    Processing Logic:
+        - Fetches data from an external API using a POST request.
+        - Filters dataset IDs based on the 'simple_undercut' flag and 'region' parameter.
+        - Distinguishes dataset ID selection criteria when 'simple_undercut' is True or False."""
     print("Getting update timers")
     # get from api every time
     update_timers = requests.post(
@@ -87,6 +107,16 @@ def get_update_timers(region, simple_undercut=False):
 def send_to_discord(embed, webhook_url):
     # Send message
     # print(f"sending embed to discord...")
+    """Send an embed message to a Discord channel via a webhook.
+    Parameters:
+        - embed (dict): The embedded message content formatted as a dictionary.
+        - webhook_url (str): The URL of the Discord webhook for sending messages.
+    Returns:
+        - None
+    Processing Logic:
+        - Makes an HTTP POST request to the Discord webhook with the provided embed.
+        - Logs a success message if the status code of the response is 200 or 204.
+        - Logs an error message containing the status code and response text if the request fails."""
     req = requests.post(webhook_url, json={"embeds": [embed]})
     if req.status_code != 204 and req.status_code != 200:
         print(f"Failed to send embed to discord: {req.status_code} - {req.text}")
@@ -95,6 +125,18 @@ def send_to_discord(embed, webhook_url):
 
 
 def create_embed(title, description, fields, color="red"):
+    """Create an embed dictionary for Discord messages.
+    Parameters:
+        - title (str): Title of the embed message.
+        - description (str): Description text for the embed.
+        - fields (list): List of dictionaries, where each dictionary contains field name and value for the embed.
+        - color (str, optional): Color for the embed; can be "red", "green", or any other value for default shade. Default is "red".
+    Returns:
+        - dict: A dictionary structured as a Discord embed message containing title, description, fields, and footer.
+    Processing Logic:
+        - Uses hex color code depending on the specified color name.
+        - Default embed color is set to a specific shade of blue (blurple) if the color is neither "red" nor "green".
+        - Automatically includes the current time as footer text formatted as month, day, year, and 12-hour clock time."""
     if color == "red":
         embed_color = 0xFF0000
     elif color == "green":
@@ -118,6 +160,15 @@ def split_list(input_list, max_length):
     return [input_list[i:i + max_length] for i in range(0, len(input_list), max_length)]
 
 def format_discord_message():
+    """Formats and sends a Discord message with item data, including undercut and not found items.
+    Parameters:
+        - None
+    Returns:
+        - None
+    Processing Logic:
+        - Updates item data using a function designed to track undercuts.
+        - Handles empty responses by sending an error message to a Discord webhook.
+        - Constructs embedded messages with item information for undercut and not found datasets, split into manageable parts for Discord."""
     global alert_record
     # update to latest data
     update_user_undercut_data()
@@ -185,6 +236,15 @@ def format_discord_message():
 
 #### MAIN ####
 def main():
+    """Main function to manage timing and alert handling for update processes.
+    Parameters:
+        - None
+    Returns:
+        - None
+    Processing Logic:
+        - Clears the alert record at the start of each hour.
+        - Checks and processes undercuts within a certain time window after the update trigger.
+        - Pauses execution for a minute both during the active check and while waiting."""
     global alert_record
     update_time = get_update_timers(region, True)[0]["lastUploadMinute"]
     while True:
@@ -216,6 +276,16 @@ def main():
 
 
 def send_discord_message(message, webhook_url):
+    """Send a message to a Discord channel using a webhook.
+    Parameters:
+        - message (str): The message content to send to Discord.
+        - webhook_url (str): The URL of the Discord webhook to use for sending the message.
+    Returns:
+        - bool: True if the message was sent successfully, False otherwise.
+    Processing Logic:
+        - The function uses `requests.post` to send a message via a Discord webhook.
+        - It raises an exception for non-2xx HTTP status codes to ensure the request was successful.
+        - If an exception occurs during the request, it logs the error and returns False."""
     try:
         json_data = {"content": message}
         response = requests.post(webhook_url, json=json_data)

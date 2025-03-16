@@ -49,6 +49,16 @@ def read_and_parse_lua_file(file_path):
 
 def update_region_undercut_json():
     # Find the Lua file
+    """Updates the region undercut JSON file by converting Lua table data to a JSON format.
+    Parameters:
+        - None
+    Returns:
+        - None
+    Processing Logic:
+        - The function searches for a specific Lua file in the defined base directory.
+        - It parses the Lua file and converts its data into a JSON format.
+        - The output JSON data is stored in a predefined directory, creating the directory if it doesn't exist.
+        - If the Lua file is not found, a message is printed indicating this."""
     lua_file_path = os.path.join(base_directory, "SavedVariables", "SaddlebagExchangeWoW.lua")
 
     # Check if the file was found and parse it
