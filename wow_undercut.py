@@ -165,6 +165,15 @@ def create_embed(title, description, fields, color="red"):
 
 
 def split_list(input_list, max_length):
+    """Split a list into smaller chunks of specified maximum length.
+
+    Parameters:
+        - input_list (list): The list to be split into chunks.
+        - max_length (int): The maximum length of each chunk.
+
+    Returns:
+        - list: A list of smaller lists, each with maximum length of max_length.
+    """
     return [
         input_list[i : i + max_length] for i in range(0, len(input_list), max_length)
     ]

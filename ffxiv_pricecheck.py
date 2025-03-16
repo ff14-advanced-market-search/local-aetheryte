@@ -40,7 +40,7 @@ def create_embed(title, description, fields):
     return embed
 
 
-def send_to_discord(embed, webhook_url):
+def send_to_discord(embed: dict, webhook_url: str) -> None:
     # Send message
     """Send an embed message to a Discord channel using a webhook.
     Parameters:
