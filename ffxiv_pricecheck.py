@@ -14,7 +14,18 @@ suppressRepeats = True
 
 localdata = {}
 
+
 def create_embed(title, description, fields):
+    """Create a Discord embed with specified title, description, and fields.
+    Parameters:
+        - title (str): The title of the embed message.
+        - description (str): The description content of the embed message.
+        - fields (list): A list of dictionaries, each representing a field with name and value.
+    Returns:
+        - dict: A dictionary representing the Discord embed object.
+    Processing Logic:
+        - Uses a default blurple color code for the embed.
+        - Adds the current local time as a footer in the embed."""
     embed = {
         "title": title,
         "description": description,
@@ -31,6 +42,17 @@ def create_embed(title, description, fields):
 
 def send_to_discord(embed, webhook_url):
     # Send message
+    """Send an embed message to a Discord channel using a webhook.
+    Parameters:
+        - embed (dict): The embed object containing message information to be sent to Discord.
+        - webhook_url (str): The URL of the Discord webhook where the message will be sent.
+    Returns:
+        - None: This function does not return any value.
+    Processing Logic:
+        - Performs an HTTP POST request to the specified webhook URL with the embed data.
+        - Checks if the response status code indicates success (either 204 or 200) and prints a success message.
+        - Prints an error message if the response status code is not indicative of success.
+    """
     print(f"sending embed to discord...")
     req = requests.post(webhook_url, json={"embeds": [embed], "content": discordTag})
     if req.status_code != 204 and req.status_code != 200:
@@ -38,27 +60,40 @@ def send_to_discord(embed, webhook_url):
     else:
         print(f"Embed sent successfully")
 
+
 def check_for_new_matches(matches):
+    """Check for new matches against existing data.
+    Parameters:
+        - matches (list): A list of dictionaries containing details of items, such as itemID, itemName, server, minPrice, minListingQuantity, and match_desire.
+    Returns:
+        - list: A list containing new matches that differ from already existing items in local data.
+    Processing Logic:
+        - If suppressRepeats is False, the function returns the provided matches unchanged.
+        - If suppression is enabled, the function checks each match against stored data to identify new or updated matches.
+        - Updates localdata with the latest information for all item IDs in the matches list.
+    """
     if not suppressRepeats:
         # Do not perform filter checks if suppression is disabled
         return matches
-    
+
     new_alerts = []
-    
+
     for match in matches:
-        itemId = match['itemID']
-        itemName = match['itemName']
-        server = match['server']
-        minPrice = match['minPrice']
-        minListingQuantity = match['minListingQuantity']
-        match_desire = match['match_desire']
-        
+        itemId = match["itemID"]
+        itemName = match["itemName"]
+        server = match["server"]
+        minPrice = match["minPrice"]
+        minListingQuantity = match["minListingQuantity"]
+        match_desire = match["match_desire"]
+
         if itemId in localdata:
             existing = localdata[itemId]
-            if (existing['server'] == server and
-                existing['minPrice'] == minPrice and
-                existing['minListingQuantity'] == minListingQuantity and
-                existing['match_desire'] == match_desire):
+            if (
+                existing["server"] == server
+                and existing["minPrice"] == minPrice
+                and existing["minListingQuantity"] == minListingQuantity
+                and existing["match_desire"] == match_desire
+            ):
                 print(f"{itemName} -- Exact match found")
             else:
                 print(f"{itemName} -- New sale alert")
@@ -66,18 +101,29 @@ def check_for_new_matches(matches):
         else:
             print(f"{itemName} -- First sale alert")
             new_alerts.append(match)
-        
+
         # Update localdata with the latest information
         localdata[itemId] = {
-            'server': server,
-            'minPrice': minPrice,
-            'minListingQuantity': minListingQuantity,
-            'match_desire': match_desire
+            "server": server,
+            "minPrice": minPrice,
+            "minListingQuantity": minListingQuantity,
+            "match_desire": match_desire,
         }
-        
+
     return new_alerts
 
+
 def create_pricecheck_message(json_response, webhook_url):
+    """Generate a message containing items that match specified price alert criteria and send it to a Discord webhook.
+    Parameters:
+        - json_response (dict): Contains information about the items, including whether they match the alert settings.
+        - webhook_url (str): The URL of the Discord webhook where the message will be sent.
+    Returns:
+        - None: The function does not return anything explicitly.
+    Processing Logic:
+        - Filters out items without a name from the matching list.
+        - Checks for any new matches after applying suppression checks.
+        - Constructs and sends a Discord message only if there are matching items."""
     title = "Price Alert"
     description = f"List of items that match your price alert settings"
     fields = []
@@ -109,6 +155,17 @@ def create_pricecheck_message(json_response, webhook_url):
 
 
 def run_undercut(webhooks):
+    """Processes files to perform price checks and sends results via webhooks.
+    Parameters:
+        - webhooks (dict): A dictionary mapping filenames to corresponding webhook URLs.
+    Returns:
+        - None: This function does not return any value.
+    Processing Logic:
+        - Skips processing for filenames not present in the webhooks dictionary or with the name "example.json".
+        - Validates that each file is a JSON list and that each entry contains required fields with correct types.
+        - Performs API requests for valid entries and sends results to appropriate webhooks.
+        - Prints error messages for various situations, such as missing webhooks or invalid data types.
+    """
     for filename in os.listdir(f"./ffxiv_user_data/{check_path}"):
         if filename == "example.json":
             continue
@@ -166,6 +223,15 @@ def run_undercut(webhooks):
 
 def main():
     # Load webhook URLs
+    """Main function to load webhook URLs and execute periodic undercut operations.
+    Parameters:
+        - None
+    Returns:
+        - None
+    Processing Logic:
+        - Loads webhook URLs from a JSON file within a specified config directory.
+        - Continuously runs the `run_undercut` function using these URLs.
+        - Sleeps for 5 minutes between each iteration to prevent constant execution."""
     with open(f"./ffxiv_user_data/config/{check_path}/webhooks.json") as f:
         webhooks = json.load(f)
 
