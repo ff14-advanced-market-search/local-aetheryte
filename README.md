@@ -1,5 +1,7 @@
 # local-aetheryte
 
+[New to python and need help? Talk to our AI bot.](https://github.com/ff14-advanced-market-search/local-aetheryte/issues/17)
+
 
 ```
 git clone https://github.com/ff14-advanced-market-search/local-aetheryte.git
