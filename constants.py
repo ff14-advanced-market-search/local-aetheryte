@@ -1,1 +1,1 @@
-URL_BASE = "https://api.saddlebagexchange.com/api/"
+URL_BASE = "https://api.saddlebagexchange.com/api"
