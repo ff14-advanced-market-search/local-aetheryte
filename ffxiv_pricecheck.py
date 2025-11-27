@@ -2,7 +2,7 @@ import requests
 import json
 import os
 import time
-
+from constants import URL_BASE
 check_path = "pricecheck"
 
 ###### CONFIGURATION ITEMS
@@ -200,7 +200,7 @@ def run_undercut(webhooks):
 
                     time.sleep(1)
                     response = requests.post(
-                        "http://api.saddlebagexchange.com/api/pricecheck",
+                        f"{URL_BASE}/pricecheck",
                         headers={
                             "Accept": "application/json",
                         },

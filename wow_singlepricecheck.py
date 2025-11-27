@@ -4,7 +4,7 @@ import os, json, time
 from datetime import datetime
 import requests
 from tenacity import retry, stop_after_attempt
-
+from constants import URL_BASE
 
 print("Sleep 10 sec on start to avoid spamming the api")
 time.sleep(10)
@@ -50,7 +50,7 @@ except KeyError:
 
 def simple_snipe(json_data):
     snipe_results = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/pricecheck",
+        f"{URL_BASE}/pricecheck",
         json=json_data,
     ).json()
     return snipe_results
@@ -69,7 +69,7 @@ def get_update_timers(region):
     print("Getting update timers")
     # get from api every time
     update_timers = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/uploadtimers",
+        f"{URL_BASE}/uploadtimers",
         json={},
     ).json()["data"]
 
