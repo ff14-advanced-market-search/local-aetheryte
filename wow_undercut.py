@@ -61,7 +61,7 @@ def update_user_undercut_data():
 
 def simple_undercut(json_data):
     snipe_results = requests.post(
-        f"{URL_BASE}/regionundercut",
+        f"{URL_BASE}/wow/regionundercut",
         json=json_data,
     ).json()
 
@@ -83,7 +83,7 @@ def get_update_timers(region, simple_undercut=False):
     print("Getting update timers")
     # get from api every time
     update_timers = requests.post(
-        f"{URL_BASE}/uploadtimers",
+        f"{URL_BASE}/wow/uploadtimers",
         json={},
     ).json()["data"]
 

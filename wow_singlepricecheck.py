@@ -50,7 +50,7 @@ except KeyError:
 
 def simple_snipe(json_data):
     snipe_results = requests.post(
-        f"{URL_BASE}/pricecheck",
+        f"{URL_BASE}/wow/pricecheck",
         json=json_data,
     ).json()
     return snipe_results
@@ -69,7 +69,7 @@ def get_update_timers(region):
     print("Getting update timers")
     # get from api every time
     update_timers = requests.post(
-        f"{URL_BASE}/uploadtimers",
+        f"{URL_BASE}/wow/uploadtimers",
         json={},
     ).json()["data"]
 
