@@ -3,7 +3,7 @@ from __future__ import print_function
 import os, json, time
 from datetime import datetime
 import requests
-
+from constants import URL_BASE
 from wow_auto_undercut_update import update_region_undercut_json
 
 print("Sleep 10 sec on start to avoid spamming the api")
@@ -61,7 +61,7 @@ def update_user_undercut_data():
 
 def simple_undercut(json_data):
     snipe_results = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/regionundercut",
+        f"{URL_BASE}/wow/regionundercut",
         json=json_data,
     ).json()
 
@@ -83,7 +83,7 @@ def get_update_timers(region, simple_undercut=False):
     print("Getting update timers")
     # get from api every time
     update_timers = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/uploadtimers",
+        f"{URL_BASE}/wow/uploadtimers",
         json={},
     ).json()["data"]
 
