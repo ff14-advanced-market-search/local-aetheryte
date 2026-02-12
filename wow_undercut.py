@@ -9,6 +9,8 @@ from wow_auto_undercut_update import update_region_undercut_json
 print("Sleep 10 sec on start to avoid spamming the api")
 time.sleep(10)
 
+WOW_DISCORD_CONSENT = "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
+
 #### GLOBALS ####
 try:
     config_data = json.load(open("wow_user_data/config/undercut/webhooks.json"))
@@ -60,9 +62,10 @@ def update_user_undercut_data():
 
 
 def simple_undercut(json_data):
+    payload = {"discord_consent": WOW_DISCORD_CONSENT, **json_data}
     snipe_results = requests.post(
         f"{URL_BASE}/wow/regionundercut",
-        json=json_data,
+        json=payload,
     ).json()
 
     return snipe_results
@@ -84,7 +87,7 @@ def get_update_timers(region, simple_undercut=False):
     # get from api every time
     update_timers = requests.post(
         f"{URL_BASE}/wow/uploadtimers",
-        json={},
+        json={"discord_consent": WOW_DISCORD_CONSENT, "region": region},
     ).json()["data"]
 
     # cover specific realms
