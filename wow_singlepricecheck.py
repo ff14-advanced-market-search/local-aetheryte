@@ -4,7 +4,7 @@ import os, json, time
 from datetime import datetime
 import requests
 from tenacity import retry, stop_after_attempt
-from constants import URL_BASE
+from constants import SADDLEBAG_REQUEST_HEADERS, URL_BASE
 
 print("Sleep 10 sec on start to avoid spamming the api")
 time.sleep(10)
@@ -54,6 +54,7 @@ def simple_snipe(json_data):
     payload = {"discord_consent": WOW_DISCORD_CONSENT, **json_data}
     snipe_results = requests.post(
         f"{URL_BASE}/wow/pricecheck",
+        headers=SADDLEBAG_REQUEST_HEADERS,
         json=payload,
     ).json()
     return snipe_results
@@ -73,6 +74,7 @@ def get_update_timers(region):
     # get from api every time
     update_timers = requests.post(
         f"{URL_BASE}/wow/uploadtimers",
+        headers=SADDLEBAG_REQUEST_HEADERS,
         json={"discord_consent": WOW_DISCORD_CONSENT, "region": region},
     ).json()["data"]
 

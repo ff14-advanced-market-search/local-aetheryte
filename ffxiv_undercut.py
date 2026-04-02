@@ -2,7 +2,7 @@ import requests
 import json
 import os
 import time
-from constants import URL_BASE
+from constants import SADDLEBAG_REQUEST_HEADERS, URL_BASE
 ###### CONFIGURATION ITEMS
 # Option to @mention target user or role
 # Populate with your own discord tag e.g. "<@114321431933142431>\n"
@@ -257,6 +257,7 @@ def run_undercut(webhooks):
                     response = requests.post(
                         f"{URL_BASE}/undercut",
                         headers={
+                            **SADDLEBAG_REQUEST_HEADERS,
                             "Accept": "application/json",
                         },
                         json=entry,
